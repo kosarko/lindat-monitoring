@@ -1,0 +1,105 @@
+#!/usr/bin/python
+# coding=utf-8
+# author: jm
+#
+"""
+    Test ufal handles.
+
+    This should be a nagios plugin which takes a file as the first input parameter
+    and line by line tries to access the handles in specified timeout.
+
+    see http://svn.ms.mff.cuni.cz/redmine/projects/dspace-modifications/wiki/MonitoringNagios
+"""
+import httplib
+import sys
+import time
+import urllib2
+import socket
+
+
+_EXC = 2
+_WARN = 1
+_OK = 0
+
+
+def _exit( code, msg_str, time_d ):
+    """ Exit with proper exit code """
+    print( "%s total time [%ss]|time=%ss;60.0;120.0;0;120.0\n" % (msg_str, time_d, time_d ) )
+    sys.exit(code)
+
+
+def check_resolving( host, uri, timeout, valid_status, port=80 ):
+    """
+        Try to resolve it
+    """
+    ret = _OK
+    msg = None
+    try:
+        took = time.time()
+        #
+        if port == 443:
+            conn = httplib.HTTPSConnection(host, timeout=2 * timeout)
+        else:
+            conn = httplib.HTTPConnection(host, port, timeout=2 * timeout)
+        if not uri.startswith("/"):
+            uri = "/" + uri
+        conn.request( "GET", uri )
+        resp = conn.getresponse()
+        page = resp.read()
+        took = time.time() - took
+        if took > timeout:
+            ret = _WARN
+            msg = "timeout exceeded"
+        if resp.status not in valid_status:
+            ret = _EXC
+            msg = "%s - %s not in %s" % (resp.status, resp.reason, valid_status)
+    except (urllib2.URLError, socket.timeout):
+        ret = _EXC
+
+    return ret, msg, took
+
+
+def check():
+    """
+        Check the handles
+    """
+    if len(sys.argv) < 5:
+        return _EXC, "Not enough parameters"
+
+    port = 80
+    if sys.argv[1] == "ssl":
+        port = 443
+        del sys.argv[1]
+    try:
+        host = sys.argv[1]
+        uri = sys.argv[2]
+        timeout = float(sys.argv[3])
+        valid_status = [ int(x) for x in sys.argv[4:] ]
+    except Exception, e:
+        return _EXC, "Invalid arg specified"
+
+    status = _OK
+    msgs = []
+    ret, msg, took = check_resolving( host, uri, timeout, valid_status, port )
+    # just slow
+    if ret == _WARN:
+       status = _WARN
+       msgs.append(msg)
+    # failed
+    if ret == _EXC:
+       return _EXC, "url [%s/%s] not resolved [%s]" % (host, uri, msg)
+    return status, "checked in timeout [%s] %s" % (
+        timeout, "".join(msgs))
+
+
+if __name__ == "__main__":
+    took = time.time()
+    try:
+        code, msg = check()
+    except Exception, e:
+        code = _EXC
+        msg = repr(e)
+    finally:
+        took = time.time() - took
+
+    _exit( code, msg, took )
