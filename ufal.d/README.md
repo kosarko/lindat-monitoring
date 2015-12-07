@@ -1,6 +1,6 @@
 # Configuration
 
-This directory follows most of the conventions set forth by defautl icinga2/conf.d. It uses few of the default templates etc. (TODO list)
+This directory follows most of the conventions set forth by defautl icinga2/conf.d. It uses few of the default templates etc.:
 
 * plugin-check-command
 * mail-service-notification
