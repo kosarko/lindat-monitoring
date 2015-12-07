@@ -20,3 +20,7 @@ echo 'const LindatPluginDir = "/opt/lindat-monitoring/plugins"' >> /etc/icinga2/
 ```
 
 restart icinga2
+
+### vagrant
+
+or check [lindat-monitoring-vagrant](https://github.com/ufal/lindat-monitoring-vagrant)
