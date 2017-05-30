@@ -7,6 +7,7 @@ Installation should be quite easy. First install the prerequisites and then just
 
 
 ### Prerequisites
+On ubuntu `apt-get install nagios-plugins-basic nagios-plugins-contrib`
 see plugins/README.md for the list of prerequisites
 
 ### Install
