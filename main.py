@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import urllib3
 import requests
 import json
 from urllib.parse import urlsplit
@@ -7,6 +8,9 @@ import os
 
 SHORTREF_API_URL = "https://lindat.mff.cuni.cz/repository/rest/services/handles/magic"
 ICINGA_API = "https://localhost:5665/v1"
+
+#/usr/lib/python3/dist-packages/urllib3/connectionpool.py:794: InsecureRequestWarning: Unverified HTTPS request is being made. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.org/en/latest/security.html
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def get_handles():
     with requests.session() as s:
