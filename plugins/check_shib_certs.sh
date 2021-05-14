@@ -9,7 +9,7 @@ FAIL=0
 pushd $TMP_DIR > /dev/null
 curl -s "$URL" > metadata.xml
 for i in $(seq 1 $(xmllint --xpath 'count(//*[local-name()="X509Certificate"])' metadata.xml));do
-    xmllint --xpath "//*[local-name()='KeyDescriptor'][$i]//*[local-name()='X509Certificate']/text()" metadata.xml | sed -e '1i-----BEGIN CERTIFICATE-----' -e '$a-----END CERTIFICATE-----'  > $i.pem
+    xmllint --xpath "//*[local-name()='KeyDescriptor'][$i]//*[local-name()='X509Certificate']/text()" metadata.xml | sed -e '1i-----BEGIN CERTIFICATE-----' -e '$a-----END CERTIFICATE-----' | grep -v -e '^\s*$' > $i.pem
     if openssl x509 -checkend $MIN_VALID_SEC -noout -in $i.pem; then
         true
     else
